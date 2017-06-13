@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/event_item_view"
+    android:padding="@dimen/event_item_paddin">
+
+    <TextView
+        android:id="@+id/event_item_position"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="14"
+        android:layout_marginRight="@dimen/event_item_paddin"
+        tools:text="1."/>
+    <TextView
+        android:id="@+id/event_title_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        tools:text="Event title"/>
+
+
+</LinearLayout>
