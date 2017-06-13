@@ -7,48 +7,41 @@
     android:orientation="vertical"
     tools:context="com.enigm777.android.calendareventsapp.ui.CalendarActivity">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <ImageButton
-            android:id="@+id/prev_month_image_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_prev_month"
-            android:layout_weight="5"/>
         <CalendarView
             android:id="@+id/calendar_view"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/add_event_item"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-        <ImageButton
-            android:id="@+id/next_month_image_button"
+            android:layout_gravity="end"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_action_add_event"
+            tools:ignore="VectorDrawableCompat"/>
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_next_month"
-            android:layout_weight="5"/>
-    </LinearLayout>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textColor="@color/colorPrimary"
-        android:layout_marginBottom="@dimen/event_item_paddin"
-        android:text="@string/event_list_header_text"/>
-
-
-    <ImageButton
-        android:id="@+id/add_event_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_action_add_event"/>
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginBottom="@dimen/event_item_paddin"
+            android:text="@string/event_list_header_text"/>
+    </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/event_list_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        />
 
 
 

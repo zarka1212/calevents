@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -35,8 +36,6 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     private static final String TAG = "CalendarActivity";
     public static final int PERMISSION_REQUEST_CODE = 777;
     private static final int LOADER_ID = 777;
-    private static final int NEXT_MONTH = 1;
-    private static final int PREVIOUS_MONTH = -1;
     private static final int FIRST_DAY_OF_WEEK = 2;
 
     public static final String EVENT_INTENT = "Operation";
@@ -49,9 +48,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     private CalendarView mCalendarView;
     private EventListAdapter mEventListAdapter;
     private EventContainer mEventContainer;
-    private ImageButton mNextMonthButton;
-    private ImageButton mPrevMonthButton;
-    private ImageButton mAddEventButton;
+    private FloatingActionButton mAddEventButton;
     private Calendar mCurrentCalendar;
 
     @Override
@@ -78,7 +75,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
 
         mCurrentCalendar = Calendar.getInstance();
-        initCalendarView(mCurrentCalendar);
+        //initCalendarView(mCurrentCalendar);
         mEventListAdapter = new EventListAdapter(this);
         mEventListRecyclerView.setAdapter(mEventListAdapter);
 
@@ -92,11 +89,8 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
-        mNextMonthButton = (ImageButton) findViewById(R.id.next_month_image_button);
-        mPrevMonthButton = (ImageButton) findViewById(R.id.prev_month_image_button);
-        mAddEventButton = (ImageButton) findViewById(R.id.add_event_item);
-        mNextMonthButton.setOnClickListener(this);
-        mPrevMonthButton.setOnClickListener(this);
+
+        mAddEventButton = (FloatingActionButton) findViewById(R.id.add_event_item);
         mAddEventButton.setOnClickListener(this);
     }
 
@@ -104,14 +98,6 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
 
         switch (v.getId()){
-            case R.id.next_month_image_button:
-                Log.e(TAG, "nextMonthButton pressed");
-                initCalendarMonth(NEXT_MONTH,mCurrentCalendar);
-                break;
-            case R.id.prev_month_image_button:
-                Log.e(TAG, "prevMonthButton pressed");
-                initCalendarMonth(PREVIOUS_MONTH,mCurrentCalendar);
-                break;
             case R.id.add_event_item:
                 Log.e(TAG, "addEventButton pressed");
                 Intent intent = new Intent(CalendarActivity.this, EventActivity.class);
@@ -158,22 +144,6 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
         public void onLoaderReset(Loader<ArrayList<Event>> loader) {
 
         }
-    }
-
-    private void initCalendarView(Calendar cal){
-        Calendar copyCal = (Calendar) cal.clone();
-        copyCal.set(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.getActualMinimum(Calendar.DAY_OF_MONTH),cal.getActualMinimum(Calendar.HOUR),cal.getActualMinimum(Calendar.MINUTE));
-        mCalendarView.setMinDate(copyCal.getTimeInMillis());
-        copyCal.set(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.getActualMaximum(Calendar.DAY_OF_MONTH),cal.getActualMaximum(Calendar.HOUR),cal.getActualMaximum(Calendar.MINUTE));
-        mCalendarView.setMaxDate(copyCal.getTimeInMillis());
-        mCalendarView.invalidate();
-        Log.e(TAG, "iniCalendarView()");
-    }
-
-    private void initCalendarMonth(int monthAmount, Calendar calendar){
-        Log.e(TAG, "initCalendarMonth()");
-        calendar.add(Calendar.MONTH, monthAmount);
-        initCalendarView(calendar);
     }
 
 
