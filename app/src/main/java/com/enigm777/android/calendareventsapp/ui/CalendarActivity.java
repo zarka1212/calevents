@@ -34,7 +34,7 @@ import java.util.List;
 
 public class CalendarActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "CalendarActivity";
-    public static final int PERMISSION_REQUEST_CODE = 777;
+    public static final int PERMISSION_REQUEST_CODE = 16;
     private static final int LOADER_ID = 777;
     private static final int FIRST_DAY_OF_WEEK = 2;
 
@@ -67,7 +67,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
         mEventListRecyclerView.addItemDecoration(new DividerItemDecoration(CalendarActivity.this, DividerItemDecoration.VERTICAL));
 
         if(isPermissionDenied()){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR}, PERMISSION_REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, PERMISSION_REQUEST_CODE);
         } else {
             LoaderManager loaderManager = getSupportLoaderManager();
             loaderManager.initLoader(LOADER_ID, null, new EventListLoaderCallbacks());
@@ -75,7 +75,6 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
 
         mCurrentCalendar = Calendar.getInstance();
-        //initCalendarView(mCurrentCalendar);
         mEventListAdapter = new EventListAdapter(this);
         mEventListRecyclerView.setAdapter(mEventListAdapter);
 

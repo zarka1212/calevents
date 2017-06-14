@@ -84,7 +84,6 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
             mCurrentCalendar.set(Calendar.MINUTE, mEventTimePicker.getCurrentMinute());
             event.setEventDate(mCurrentCalendar.getTimeInMillis());
         }
-
         return event;
     }
 }
