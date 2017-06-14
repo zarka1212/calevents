@@ -84,6 +84,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 Log.e(TAG, "onSelectedDayChange(): year = " + year + " month = " + month + " day = " + dayOfMonth);
                 mCurrentCalendar.set(year, month, dayOfMonth);
+                Log.e(TAG, "onSelectedDayChange(): mCurrentCalendar = " + mCurrentCalendar.toString());
                 mEventListAdapter.setEventList(mEventContainer.getEventList(), year, month, dayOfMonth);
             }
         });

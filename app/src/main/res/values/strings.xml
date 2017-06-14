@@ -12,4 +12,5 @@
     <string name="save_event_button_text">Save</string>
     <string name="delete_event_button_text">Delete</string>
     <string name="local_calendar_name">CalendarEventApp</string>
+    <string name="empty_fields_toast_message">Please insert title of event</string>
 </resources>

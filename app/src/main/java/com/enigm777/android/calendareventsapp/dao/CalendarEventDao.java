@@ -54,7 +54,7 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
     }
 
     @Override
-    public void createEvent(Event event) {
+    public void createEvent(Event event) throws SecurityException{
         Log.e(TAG, "createEvent(): event = " + event.toString());
         startInsert(QUERY_TOKEN, null, CalendarContract.Events.CONTENT_URI, createContentValuesFromEvent(event));
     }
@@ -95,7 +95,7 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         } else {
             Log.e(TAG, "successfully inserted new event" + uri.toString());
         }
-        
+
     }
 
     @Override
@@ -112,29 +112,21 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
 
     private long initCalendar() throws SecurityException{
         long calendar_id;
-        Cursor cursor = mContentResolver.query(CalendarContract.Calendars.CONTENT_URI, CALENDAR_PROJECTION, null, null, null, null);
-        DatabaseUtils.dumpCursor(cursor);
-        if (cursor != null && cursor.moveToFirst()){
-            calendar_id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
-            Log.e(TAG, "calendar_id found = " + calendar_id + " content_uri = " + CalendarContract.Calendars.CONTENT_URI);
-            cursor.close();
-        } else {
-            Uri syncUri = CalendarContract.Calendars.CONTENT_URI.buildUpon()
-                    .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,"true")
-                    .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name))
-                    .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL).build();
+        Uri syncUri = CalendarContract.Calendars.CONTENT_URI.buildUpon()
+                .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,"true")
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name))
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL).build();
 
-            ContentValues cv = new ContentValues();
-            cv.put(CalendarContract.Calendars.NAME, mContext.getString(R.string.local_calendar_name) );
-            cv.put(CalendarContract.Calendars.CALENDAR_COLOR, "");
-            cv.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
-            cv.put(CalendarContract.Calendars.OWNER_ACCOUNT, mContext.getString(R.string.app_name));
-            cv.put(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name));
-            cv.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
-            Uri newCalendar = mContentResolver.insert(syncUri, cv);
-            calendar_id = ContentUris.parseId(newCalendar);
-            Log.e(TAG, "created new local calendar with uri = " + newCalendar);
-        }
+        ContentValues cv = new ContentValues();
+        cv.put(CalendarContract.Calendars.NAME, mContext.getString(R.string.local_calendar_name) );
+        cv.put(CalendarContract.Calendars.CALENDAR_COLOR, "");
+        cv.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
+        cv.put(CalendarContract.Calendars.OWNER_ACCOUNT, mContext.getString(R.string.app_name));
+        cv.put(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name));
+        cv.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+        Uri newCalendar = mContentResolver.insert(syncUri, cv);
+        calendar_id = ContentUris.parseId(newCalendar);
+        Log.e(TAG, "created new local calendar with uri = " + newCalendar);
         return calendar_id;
     }
 
@@ -148,8 +140,8 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         contentValues.put(CalendarContract.Events.EVENT_LOCATION, event.getEventLocation());
         contentValues.put(CalendarContract.Events.DTSTART, event.getEventDate());
         contentValues.put(CalendarContract.Events.CALENDAR_ID, mCalendarId);
-        contentValues.put(CalendarContract.Events.EVENT_TIMEZONE, String.valueOf(Calendar.getInstance().getTimeZone()));
-        contentValues.put(CalendarContract.Events.DURATION, String.valueOf(DEFAULT_EVENT_DURATION));
+        contentValues.put(CalendarContract.Events.EVENT_TIMEZONE, CalendarContract.Calendars.CALENDAR_TIME_ZONE);
+        contentValues.put(CalendarContract.Events.DTEND, event.getEventDate()+DEFAULT_EVENT_DURATION);
         Log.e(TAG, "createContentValuesFromEvent(): " + contentValues.toString());
         return contentValues;
     }

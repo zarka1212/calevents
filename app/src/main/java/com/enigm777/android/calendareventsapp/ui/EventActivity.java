@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.enigm777.android.calendareventsapp.EventContainerProvider;
 import com.enigm777.android.calendareventsapp.R;
@@ -26,6 +27,7 @@ import java.util.Calendar;
 
 public class EventActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "EventActivity";
+    private static final int DEFAULT_INTENT_EXTRA_VALUE = -1;
 
     private EditText mTitleEditText;
     private EditText mDescriptionEditText;
@@ -52,8 +54,12 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
         mSaveEventButton.setOnClickListener(this);
         mDeleteEventButton.setOnClickListener(this);
 
+        if(getIntent().getIntExtra(CalendarActivity.EVENT_INTENT, DEFAULT_INTENT_EXTRA_VALUE)==CalendarActivity.ADD_EVENT_CODE){
+            mDeleteEventButton.setEnabled(false);
+        }
+
         mCurrentCalendar = Calendar.getInstance();
-        mCurrentCalendar.setTimeInMillis(getIntent().getLongExtra(CalendarActivity.CURRENT_DATE_EVENT_INTENT, System.currentTimeMillis()));
+        mCurrentCalendar.setTimeInMillis(getIntent().getLongExtra(CalendarActivity.CURRENT_DATE_EVENT_INTENT, 0));
 
         mEventContainer = ((EventContainerProvider)getApplication()).getEventContainer();
 
@@ -64,6 +70,11 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()){
             case R.id.event_save_button:
                 Log.e(TAG,"save event button clicked");
+                Event newEvent = constructEvent();
+                if(newEvent == null){
+                    Toast.makeText(this, R.string.empty_fields_toast_message, Toast.LENGTH_LONG).show();
+                    break;
+                }
                 mEventContainer.addEvent(constructEvent());
                 finish();
                 break;
@@ -72,15 +83,15 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private Event constructEvent(){
-        Event event = new Event();
-
-        if(!TextUtils.isEmpty(mTitleEditText.getText())||
-                !TextUtils.isEmpty(mDescriptionEditText.getText())||
-                !TextUtils.isEmpty(mLocationEditText.getText())){
+        Event event = null;
+        if(TextUtils.isEmpty(mTitleEditText.getText())){
+            return event;
+        } else {
+            event = new Event();
             event.setEventTitle(mTitleEditText.getText().toString().trim());
             event.setEventDescription(mDescriptionEditText.getText().toString().trim());
             event.setEventLocation(mDescriptionEditText.getText().toString().trim());
-            mCurrentCalendar.set(Calendar.HOUR, mEventTimePicker.getCurrentHour());
+            mCurrentCalendar.set(Calendar.HOUR_OF_DAY, mEventTimePicker.getCurrentHour());
             mCurrentCalendar.set(Calendar.MINUTE, mEventTimePicker.getCurrentMinute());
             event.setEventDate(mCurrentCalendar.getTimeInMillis());
         }
