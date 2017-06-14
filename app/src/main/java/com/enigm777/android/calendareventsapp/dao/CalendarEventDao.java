@@ -110,28 +110,9 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         Log.e(TAG, "successfully updated event");
     }
 
-    private long initCalendar() throws SecurityException{
-        long calendar_id;
-        Uri syncUri = CalendarContract.Calendars.CONTENT_URI.buildUpon()
-                .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,"true")
-                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name))
-                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL).build();
-
-        ContentValues cv = new ContentValues();
-        cv.put(CalendarContract.Calendars.NAME, mContext.getString(R.string.local_calendar_name) );
-        cv.put(CalendarContract.Calendars.CALENDAR_COLOR, "");
-        cv.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
-        cv.put(CalendarContract.Calendars.OWNER_ACCOUNT, mContext.getString(R.string.app_name));
-        cv.put(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name));
-        cv.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
-        Uri newCalendar = mContentResolver.insert(syncUri, cv);
-        calendar_id = ContentUris.parseId(newCalendar);
-        Log.e(TAG, "created new local calendar with uri = " + newCalendar);
-        return calendar_id;
-    }
-
     private ContentValues createContentValuesFromEvent(Event event){
-        if (mCalendarId == DEFAULT_CALENDAR_ID){
+        mCalendarId = getCalendarIdIfExists();
+        if (mCalendarId == DEFAULT_CALENDAR_ID || mCalendarId == 0){
             mCalendarId = initCalendar();
         }
         ContentValues contentValues = new ContentValues();
@@ -154,5 +135,37 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         event.setEventDescription(cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DESCRIPTION)));
         event.setEventDate(cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART)));
         return event;
+    }
+
+    private long initCalendar() throws SecurityException{
+        long calendar_id;
+        Uri syncUri = CalendarContract.Calendars.CONTENT_URI.buildUpon()
+                .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,"true")
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name))
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL).build();
+
+        ContentValues cv = new ContentValues();
+        cv.put(CalendarContract.Calendars.NAME, mContext.getString(R.string.local_calendar_name) );
+        cv.put(CalendarContract.Calendars.CALENDAR_COLOR, "");
+        cv.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
+        cv.put(CalendarContract.Calendars.OWNER_ACCOUNT, mContext.getString(R.string.app_name));
+        cv.put(CalendarContract.Calendars.ACCOUNT_NAME, mContext.getString(R.string.app_name));
+        cv.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+        Uri newCalendar = mContentResolver.insert(syncUri, cv);
+        calendar_id = ContentUris.parseId(newCalendar);
+        Log.e(TAG, "created new local calendar with uri = " + newCalendar);
+        return calendar_id;
+    }
+
+    private long getCalendarIdIfExists() throws SecurityException{
+        long calendar_id = DEFAULT_CALENDAR_ID;
+
+        Cursor cursor  = mContentResolver.query(CalendarContract.Calendars.CONTENT_URI, CALENDAR_PROJECTION, null, null, null);
+        if(cursor != null && cursor.moveToFirst()){
+            calendar_id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+            cursor.close();
+        }
+        Log.e(TAG, "found calendar with id = " + calendar_id);
+        return calendar_id;
     }
 }
