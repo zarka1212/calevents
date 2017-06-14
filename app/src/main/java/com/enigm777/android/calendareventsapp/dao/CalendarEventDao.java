@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -33,6 +34,9 @@ import java.util.TimeZone;
 
 public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
     private static final String TAG = "CalendarEventDao";
+    private static final String SHARED_PREF_FILE_NAME = "calendar_app_pref";
+    private static final String SAVED_CALENDAR_ID = "local_calendar_id";
+
     private static final int QUERY_TOKEN = 777;
     private static final long DEFAULT_CALENDAR_ID = -1;
     private static final int DEFAULT_EVENT_DURATION = 3600000;
@@ -44,6 +48,7 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
     private ContentResolver mContentResolver;
     private Context mContext;
     private long mCalendarId;
+    private SharedPreferences mSharedPreferences;
 
 
     public CalendarEventDao(Context context) {
@@ -51,6 +56,7 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mCalendarId = DEFAULT_CALENDAR_ID;
+        mSharedPreferences = context.getSharedPreferences(SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -95,7 +101,6 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
         } else {
             Log.e(TAG, "successfully inserted new event" + uri.toString());
         }
-
     }
 
     @Override
@@ -159,11 +164,17 @@ public class CalendarEventDao extends AsyncQueryHandler implements EventDao {
 
     private long getCalendarIdIfExists() throws SecurityException{
         long calendar_id = DEFAULT_CALENDAR_ID;
-
-        Cursor cursor  = mContentResolver.query(CalendarContract.Calendars.CONTENT_URI, CALENDAR_PROJECTION, null, null, null);
-        if(cursor != null && cursor.moveToFirst()){
-            calendar_id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
-            cursor.close();
+        if (mSharedPreferences.contains(SAVED_CALENDAR_ID)){
+            calendar_id = mSharedPreferences.getLong(SAVED_CALENDAR_ID, DEFAULT_CALENDAR_ID);
+        } else {
+            Cursor cursor = mContentResolver.query(CalendarContract.Calendars.CONTENT_URI, CALENDAR_PROJECTION, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                calendar_id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+                cursor.close();
+            }
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putLong(SAVED_CALENDAR_ID, calendar_id);
+            editor.apply();
         }
         Log.e(TAG, "found calendar with id = " + calendar_id);
         return calendar_id;
