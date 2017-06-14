@@ -1,6 +1,7 @@
 package com.enigm777.android.calendareventsapp.ui;
 
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,8 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
     private EventContainer mEventContainer;
 
     private Calendar mCurrentCalendar;
+    private int mActionCode;
+    private Event mCurrentEvent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,15 +57,19 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
         mSaveEventButton.setOnClickListener(this);
         mDeleteEventButton.setOnClickListener(this);
 
-        if(getIntent().getIntExtra(CalendarActivity.EVENT_INTENT, DEFAULT_INTENT_EXTRA_VALUE)==CalendarActivity.ADD_EVENT_CODE){
-            mDeleteEventButton.setEnabled(false);
-        }
-
         mCurrentCalendar = Calendar.getInstance();
-        mCurrentCalendar.setTimeInMillis(getIntent().getLongExtra(CalendarActivity.CURRENT_DATE_EVENT_INTENT, 0));
-
+        mActionCode = getIntent().getIntExtra(CalendarActivity.EVENT_INTENT, DEFAULT_INTENT_EXTRA_VALUE);
+        switch (mActionCode){
+            case CalendarActivity.ADD_EVENT_CODE:
+                mCurrentCalendar.setTimeInMillis(getIntent().getLongExtra(CalendarActivity.CURRENT_DATE_EVENT_INTENT, 0));
+                mDeleteEventButton.setEnabled(false);
+                break;
+            case CalendarActivity.EDIT_EVENT_CODE:
+                mCurrentEvent = (Event)getIntent().getSerializableExtra(CalendarActivity.EVENT_INTENT_EXTRA);
+                mCurrentCalendar.setTimeInMillis(mCurrentEvent.getEventDate());
+                initEventFieldsToEdit(mCurrentEvent);
+        }
         mEventContainer = ((EventContainerProvider)getApplication()).getEventContainer();
-
     }
 
     @Override
@@ -75,7 +82,18 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(this, R.string.empty_fields_toast_message, Toast.LENGTH_LONG).show();
                     break;
                 }
-                mEventContainer.addEvent(constructEvent());
+                if(mActionCode == CalendarActivity.ADD_EVENT_CODE) {
+                    mEventContainer.addEvent(constructEvent());
+                } else {
+                    mEventContainer.updateEvent(constructEvent());
+                }
+                finish();
+                break;
+            case R.id.event_delete_button:
+                Log.e(TAG, "delete event button clicked: event = " + mCurrentEvent.toString());
+                if(mCurrentEvent != null){
+                    mEventContainer.deleteEvent(mCurrentEvent);
+                }
                 finish();
                 break;
 
@@ -83,18 +101,30 @@ public class EventActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private Event constructEvent(){
-        Event event = null;
         if(TextUtils.isEmpty(mTitleEditText.getText())){
-            return event;
+            return null;
         } else {
-            event = new Event();
-            event.setEventTitle(mTitleEditText.getText().toString().trim());
-            event.setEventDescription(mDescriptionEditText.getText().toString().trim());
-            event.setEventLocation(mDescriptionEditText.getText().toString().trim());
+            if(mCurrentEvent == null) {
+                mCurrentEvent = new Event();
+            }
+            mCurrentEvent.setEventTitle(mTitleEditText.getText().toString().trim());
+            mCurrentEvent.setEventDescription(mDescriptionEditText.getText().toString().trim());
+            mCurrentEvent.setEventLocation(mDescriptionEditText.getText().toString().trim());
             mCurrentCalendar.set(Calendar.HOUR_OF_DAY, mEventTimePicker.getCurrentHour());
             mCurrentCalendar.set(Calendar.MINUTE, mEventTimePicker.getCurrentMinute());
-            event.setEventDate(mCurrentCalendar.getTimeInMillis());
+            mCurrentEvent.setEventDate(mCurrentCalendar.getTimeInMillis());
         }
-        return event;
+        return mCurrentEvent;
+    }
+
+    private void initEventFieldsToEdit(Event event){
+        Log.e(TAG, "initEventFieldsToEdit()");
+        mTitleEditText.setText(event.getEventTitle());
+        mDescriptionEditText.setText(event.getEventDescription());
+        mLocationEditText.setText(event.getEventLocation());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mEventTimePicker.setHour(mCurrentCalendar.get(Calendar.HOUR_OF_DAY));
+            mEventTimePicker.setHour(mCurrentCalendar.get(Calendar.MINUTE));
+        }
     }
 }

@@ -87,4 +87,8 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         Log.e(TAG, "getCurrentDateEventList(): old eventList size = " + eventList.size() + " new size = " + events.size());
         return events;
     }
+
+    public Event getEventFromPosition(int position){
+        return mEventList.get(position);
+    }
 }

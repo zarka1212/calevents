@@ -43,6 +43,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
     public static final int ADD_EVENT_CODE = 0;
     public static final int EDIT_EVENT_CODE = 1;
+    public static final String EVENT_INTENT_EXTRA = "event";
 
     private RecyclerView mEventListRecyclerView;
     private CalendarView mCalendarView;
@@ -91,21 +92,27 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
 
         mAddEventButton = (FloatingActionButton) findViewById(R.id.add_event_item);
-        mAddEventButton.setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()){
-            case R.id.add_event_item:
+        mAddEventButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 Log.e(TAG, "addEventButton pressed");
                 Intent intent = new Intent(CalendarActivity.this, EventActivity.class);
                 intent.putExtra(EVENT_INTENT, ADD_EVENT_CODE);
                 intent.putExtra(CURRENT_DATE_EVENT_INTENT, mCurrentCalendar.getTimeInMillis());
                 startActivity(intent);
-                break;
-        }
+            }
+        });
+    }
+
+    @Override
+    public void onClick(View v) {
+        int itemPosition = mEventListRecyclerView.getChildLayoutPosition(v);
+        Event event = mEventListAdapter.getEventFromPosition(itemPosition);
+        Intent intent = new Intent(CalendarActivity.this, EventActivity.class);
+        intent.putExtra(EVENT_INTENT, EDIT_EVENT_CODE);
+        intent.putExtra(EVENT_INTENT_EXTRA, event);
+        startActivity(intent);
+        Log.e(TAG, "clicked on event, itemPosition = " + itemPosition + " event = " + event.toString());
     }
 
     @Override
@@ -145,6 +152,5 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
         }
     }
-
 
 }

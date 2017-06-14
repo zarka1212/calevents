@@ -1,10 +1,12 @@
 package com.enigm777.android.calendareventsapp.model;
 
+import java.io.Serializable;
+
 /**
  * Created by enigm777 on 11.06.2017.
  */
 
-public class Event {
+public class Event implements Serializable{
 
     private long mEventDate;
     private String mEventTitle;
